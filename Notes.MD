@@ -21,4 +21,9 @@
   * We need the bytes to tranfer a key press to stoud 
   * For that purpose we use shadowing (Redeclaring a variable inside a loop with the same name as the loop). This is perfectly legal in rust
   * `\r` prints the output neatly line by line (Carriage return)
-  * Using this however we destroyed our quitting of the programm and we need to change the break statement
+  * Functions need no return if the last expression should be returned, then the `;` is omitted.
+  * `println!("{:#b}", b);` prints binary represenation of a character
+  * Error handling in rust:
+    * You cannot use `try .. catch` in Rust, instead we need to propagate errors along to the highest level
+
+### Key Takeaways
