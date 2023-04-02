@@ -28,6 +28,7 @@
     * Thus we need to wrap all code we want to do error handling on, which returns a Results, which in return either contains an error or the result we are after. More on this can be read here https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html 
     * With `match` we can handle errors. Basically it works like an if-else statement with different syntax 
 
+
 ### Key Takeaways for Rust
 
 * Packages can be imported using the `use` declaration 
@@ -46,7 +47,18 @@
 * A `struct` is a collection of variables and eventually functions forming an entity (Similiar to pythons `class`). A big advantage of structs is that we can use several declarations like `pub, private, etc` to say where the struct should be accessible
 * Implementing functions for a struct is done using the `impl` keyword
 * `&self` is a reference to the struct a function was called upon &Rightarrow; `&` is the keyword for references
+* **Clippy** is an awesome tool for analysing your code: 
+  * Run `cargo clean` to make sure clippy analyses the whole code (Because we learnt cargo build only looks for changes)
+  * Use `cargo clippy -- -W clippy::pedantic` to get an analysis of your code where clippy is very strict (Leave the flag if you do not want this)
+* The `loop` keyword can be used to start an infinite loop
+* `if let` is a shortcut for match where only one case should be handled andall others ignored
+* Writing `?` after a function call means we want to stop here and return with an error (if one occurs in the called function) or else continue. 
+* In rust we do not want to panic somewhere deep inside our code, instead we want to end at the highest leavel if possible. Thus we define a bool variable that is checked and if true we quit. To achieve this we have to change the reference defined by `&self` to a mutable reference `&mut self`. Otherwise we would not be able to change the value of the bool variable in different functions. 
+
 
 ### Key Takeaways for Rust
 
-* **Structs** are similiar to python classes and are initiated f.e `pub struct Example {...}`. They have accessor keywords, telling the compiler where the struct should be accessible from
+* **Structs** are similiar to python classes and are initiated f.e `pub struct Example {...}`. They have accessor keywords, telling the compiler where the struct should be accessible from. 
+  * By using the `impl` keyword we can create an implementation of a struct, allowing us to build more complex class hierachies. 
+  * By defining `&self` inside a function from a struct we cann implement methods that run on an instance of a class
+  * By leaving `&self` away we can build static functions for a struct
