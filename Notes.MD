@@ -54,6 +54,9 @@
 * `if let` is a shortcut for match where only one case should be handled andall others ignored
 * Writing `?` after a function call means we want to stop here and return with an error (if one occurs in the called function) or else continue. 
 * In rust we do not want to panic somewhere deep inside our code, instead we want to end at the highest leavel if possible. Thus we define a bool variable that is checked and if true we quit. To achieve this we have to change the reference defined by `&self` to a mutable reference `&mut self`. Otherwise we would not be able to change the value of the bool variable in different functions. 
+* Escaoe sequences start with `\x1b` and are followed by 3 other bytes to instruct the terminal what to do. Examples are coloring text, moving the curson or clearing parts of the screen. 
+  * In our example `[2J` means clear the screen (=J) 2 = Entrire screen 
+  * Documentation of escape sequences https://vt100.net/docs/vt100-ug/chapter3.html
 
 
 ### Key Takeaways for Rust
