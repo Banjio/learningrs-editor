@@ -1,24 +1,20 @@
-use std::io::{self, stdout, Write};
+use crate::Terminal;
 use termion::event::Key;
-use termion::input::TermRead;
-use termion::raw::IntoRawMode;
 
 fn die(e: std::io::Error) {
-    print!("{}", termion::clear::All);
+    Terminal::clear_screen();
     panic!("{}", e);
 }
 
 pub struct Editor {
     // Instead
     should_quit: bool,
+    terminal: Terminal,
 }
 
 impl Editor{
 
     pub fn run(&mut self){
-        let _stdout = stdout().
-        into_raw_mode().
-        unwrap();
         loop{
             if let Err(error) = self.refresh_screen() {
                 die(error);
@@ -36,23 +32,27 @@ impl Editor{
     fn refresh_screen(&self) -> Result<(), std::io::Error> {
         //We use print to write 4 bytes. The first byte is x1b = Escape character. => This initiates an escape sequence followed by instuctions what to do with the escape sequence
         //print!("\x1b[2j");
-        // Using termion we can achieve the same
-        print!("{}", termion::clear::All);
+        // Using termion we can achieve the same -> Now moved to terminal.rs
+        Terminal::clear_screen();
         // After clearing the cursor will be at the bottom of the screen this will set it to the top again
-        print!("{}", termion::cursor::Goto(1, 1));
+        //print!("{}", termion::cursor::Goto(1, 1));
+        Terminal::cursor_position(0, 0);
         // Print a goodbye messages in case the user leaves
         // Remember that if we get an error or leave, we once finally refresh the screen => hence we can print it here 
         if self.should_quit {
             println!("Goodbye, Mate.\r")
         } else {
             self.draw_rows();
-            print!("{}", termion::cursor::Goto(1,1));
+            // After darwing rows we will end at the bottom of the screen, this will set our cursor to the top
+            //print!("{}", termion::cursor::Goto(1,1));
+            Terminal::cursor_position(0, 0);
         }
-        io::stdout().flush()
+        Terminal::flush()
     }
 
     fn process_keypress(&mut self) -> Result<(), std::io::Error>{
-        let pressed_key = Self::read_key()?;
+        //let pressed_key = Self::read_key()?;
+        let pressed_key = Terminal::read_key()?;
         match pressed_key {
             Key::Ctrl('q') => self.should_quit = true,
             _ => (),
@@ -61,22 +61,18 @@ impl Editor{
     }
 
     fn draw_rows(&self) {
-        for _ in 0..24 {
-            println!("~r");
-        }
-    }
-
-    fn read_key() -> Result<Key, std::io::Error> {
-        loop {
-            // io::stdin().lock().keys().next() returns an Option which also can be None in which case the loop is continued
-            if let Some(key) = io::stdin().lock().keys().next() {
-                return key;
-            }
+        for _ in 0..self.terminal.size().height {
+            println!("~\r");
         }
     }
 
     pub fn default() -> Self {
-        Self{should_quit: false}
+        let msg = "Mate, initilialising ya terminal failed!";
+        Self{
+            should_quit: false, 
+            // As terminal also can return an error we catch it here and panic. No need to call die, because die would also remove what was drawn to the screen. At this point nothing has been drawn. 
+            terminal: Terminal::default().expect(msg),
+        }
     }
 }
 

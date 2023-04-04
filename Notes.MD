@@ -58,6 +58,8 @@
   * In our example `[2J` means clear the screen (=J) 2 = Entrire screen 
   * Documentation of escape sequences https://vt100.net/docs/vt100-ug/chapter3.html
 
+* Importing a file in main.rs is done using the `mod <filename>` syntax, whereas in other files we have to use the `use crate::<filename>::<objectname>` syntax. By importing a file into main even if we dont need it there we reimport the crate an can shorten the import using `crate::<objectname>`.  
+
 
 ### Key Takeaways for Rust
 
