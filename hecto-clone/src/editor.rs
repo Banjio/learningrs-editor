@@ -1,15 +1,22 @@
 use crate::Terminal;
 use termion::event::Key;
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 fn die(e: std::io::Error) {
     Terminal::clear_screen();
     panic!("{}", e);
+}
+struct Position{
+    x: usize,
+    y: usize,
 }
 
 pub struct Editor {
     // Instead
     should_quit: bool,
     terminal: Terminal,
+    cursor_position: Position,
 }
 
 impl Editor{
@@ -30,16 +37,17 @@ impl Editor{
     }
 
     fn refresh_screen(&self) -> Result<(), std::io::Error> {
+        Terminal::cursor_hide();
         //We use print to write 4 bytes. The first byte is x1b = Escape character. => This initiates an escape sequence followed by instuctions what to do with the escape sequence
         //print!("\x1b[2j");
         // Using termion we can achieve the same -> Now moved to terminal.rs
-        Terminal::clear_screen();
         // After clearing the cursor will be at the bottom of the screen this will set it to the top again
         //print!("{}", termion::cursor::Goto(1, 1));
         Terminal::cursor_position(0, 0);
         // Print a goodbye messages in case the user leaves
         // Remember that if we get an error or leave, we once finally refresh the screen => hence we can print it here 
         if self.should_quit {
+            Terminal::clear_screen();
             println!("Goodbye, Mate.\r")
         } else {
             self.draw_rows();
@@ -47,6 +55,7 @@ impl Editor{
             //print!("{}", termion::cursor::Goto(1,1));
             Terminal::cursor_position(0, 0);
         }
+        Terminal::cursor_show();
         Terminal::flush()
     }
 
@@ -60,9 +69,30 @@ impl Editor{
         Ok(())
     }
 
+    fn draw_welcome_message(&self) {
+        let mut welcome_message = format!("Greetings Crustacian. The version of this editor is {}.\r", VERSION);
+        let width = self.terminal.size().width as usize;
+        let len = welcome_message.len();
+        // We do this to center the welcome message according to the terminal size
+        let padding = width.saturating_sub(len) / 2;
+        // Repeat a string n times
+        let spaces = " ".repeat(padding.saturating_sub(1));
+        welcome_message = format!("~{}{}", spaces, welcome_message);
+        // Shorten a string if widh < string length
+        welcome_message.truncate(width);
+        println!("{}\r", welcome_message);
+    }
+
     fn draw_rows(&self) {
-        for _ in 0..self.terminal.size().height {
-            println!("~\r");
+        let height: u16 = self.terminal.size().height;
+        for row in 0..height - 1{
+            Terminal::clear_current_line();
+            if row == height / 3{
+                self.draw_welcome_message();
+            } else {
+                println!("~\r");
+            }
+            
         }
     }
 
@@ -72,6 +102,8 @@ impl Editor{
             should_quit: false, 
             // As terminal also can return an error we catch it here and panic. No need to call die, because die would also remove what was drawn to the screen. At this point nothing has been drawn. 
             terminal: Terminal::default().expect(msg),
+            // Cursor starts at top left of the screen
+            cursor_position: Position { x: 0, y: 0 },
         }
     }
 }

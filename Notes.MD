@@ -59,6 +59,11 @@
   * Documentation of escape sequences https://vt100.net/docs/vt100-ug/chapter3.html
 
 * Importing a file in main.rs is done using the `mod <filename>` syntax, whereas in other files we have to use the `use crate::<filename>::<objectname>` syntax. By importing a file into main even if we dont need it there we reimport the crate an can shorten the import using `crate::<objectname>`.  
+* Clearing a screen (using termion or escape sequences), ensures that content that was previously written to the terminal is not shown in the programm (Basically the standard we want with editors)
+* With `let welcome_message = format!("Greetings Crustacian. The version of this editor is {}.\r", VERSION);` we can do string interpolation
+* Using `&string_name[..some_integers]` we can slice a string until some point. Be careful slicing over the strings length may cause rust to panic
+* The datatpye `usize` is using the machines architecture we compile to, to determine the size of an integer.
+
 
 
 ### Key Takeaways for Rust
