@@ -1,4 +1,5 @@
 use crate::Terminal;
+use crate::Document;
 use termion::event::Key;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -7,9 +8,10 @@ fn die(e: std::io::Error) {
     Terminal::clear_screen();
     panic!("{}", e);
 }
-struct Position{
-    x: usize,
-    y: usize,
+#[derive(Default)]
+pub struct Position{
+    pub x: usize,
+    pub y: usize,
 }
 
 pub struct Editor {
@@ -17,6 +19,7 @@ pub struct Editor {
     should_quit: bool,
     terminal: Terminal,
     cursor_position: Position,
+    document: Document,
 }
 
 impl Editor{
@@ -43,7 +46,7 @@ impl Editor{
         // Using termion we can achieve the same -> Now moved to terminal.rs
         // After clearing the cursor will be at the bottom of the screen this will set it to the top again
         //print!("{}", termion::cursor::Goto(1, 1));
-        Terminal::cursor_position(0, 0);
+        Terminal::cursor_position(&Position::default());
         // Print a goodbye messages in case the user leaves
         // Remember that if we get an error or leave, we once finally refresh the screen => hence we can print it here 
         if self.should_quit {
@@ -53,7 +56,7 @@ impl Editor{
             self.draw_rows();
             // After darwing rows we will end at the bottom of the screen, this will set our cursor to the top
             //print!("{}", termion::cursor::Goto(1,1));
-            Terminal::cursor_position(0, 0);
+            Terminal::cursor_position(&self.cursor_position);
         }
         Terminal::cursor_show();
         Terminal::flush()
@@ -64,9 +67,46 @@ impl Editor{
         let pressed_key = Terminal::read_key()?;
         match pressed_key {
             Key::Ctrl('q') => self.should_quit = true,
+            Key::Up 
+                | Key::Down 
+                | Key::Left 
+                | Key::Right
+                | Key::PageUp
+                | Key::PageDown
+                | Key::End
+                | Key::Home => self.move_cursor(pressed_key),
             _ => (),
         }
         Ok(())
+    }
+
+    fn move_cursor(&mut self, key: Key) {
+        let Position{mut y, mut x} = self.cursor_position;
+        let size = self.terminal.size();
+        let height = size.height.saturating_sub(1) as usize;
+        let width = size.width.saturating_sub(1) as usize;
+
+        match key {
+            Key::Up => y = y.saturating_sub(1),
+            Key::Down => {
+                if y < height{
+                    y = y.saturating_add(1);
+                }
+            },
+            Key::Left => x = x.saturating_sub(1),
+            Key::Right => {
+                if x < width {
+                    x = x.saturating_add(1);
+                }
+            },
+            Key::PageUp => y = 0,
+            Key::PageDown => y = height,
+            Key::Home => x = 0,
+            Key::End => x = width,
+            _ => (),
+
+        }
+        self.cursor_position = Position {x, y}
     }
 
     fn draw_welcome_message(&self) {
@@ -103,7 +143,8 @@ impl Editor{
             // As terminal also can return an error we catch it here and panic. No need to call die, because die would also remove what was drawn to the screen. At this point nothing has been drawn. 
             terminal: Terminal::default().expect(msg),
             // Cursor starts at top left of the screen
-            cursor_position: Position { x: 0, y: 0 },
+            cursor_position: Position::default(),
+            document: Document::open(),
         }
     }
 }

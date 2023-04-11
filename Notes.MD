@@ -62,13 +62,25 @@
 * Clearing a screen (using termion or escape sequences), ensures that content that was previously written to the terminal is not shown in the programm (Basically the standard we want with editors)
 * With `let welcome_message = format!("Greetings Crustacian. The version of this editor is {}.\r", VERSION);` we can do string interpolation
 * Using `&string_name[..some_integers]` we can slice a string until some point. Be careful slicing over the strings length may cause rust to panic
-* The datatpye `usize` is using the machines architecture we compile to, to determine the size of an integer.
-
+* The datatpye `usize` is using the machines architecture we compile to, to determine the size of an integer
+* The pattern `let Position{mut x, mut y} = position` is called **destructuring**. New variables x and y are created and their values are bind to the fields with the same name in position  
 
 
 ### Key Takeaways for Rust
 
 * **Structs** are similiar to python classes and are initiated f.e `pub struct Example {...}`. They have accessor keywords, telling the compiler where the struct should be accessible from. 
   * By using the `impl` keyword we can create an implementation of a struct, allowing us to build more complex class hierachies. 
-  * By defining `&self` inside a function from a struct we cann implement methods that run on an instance of a class
-  * By leaving `&self` away we can build static functions for a struct
+  * By defining `&self` inside a function from a struct we cann implement methods that run on an instance of a class. On the contrary ommiting `&self`, we can build static functions for a struct
+  * Keywords like `pub` or `private` can be used to define the accessibility of a struct or class method
+  * `&` can be used to borrow a struct or a value from another function or struct. Borrowing is a **key concept** of Rust, read more here https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html?highlight=borrow#references-and-borrowing
+  * Clippy is a nifty tool to analyse your codebase. Run  `cargo clippy -- -W clippy::pedantic` to get a really strict analysis (including improvements) of your code &Rightarrow; Make sure to run `cargo clean` before clippy, so that your whole code is analyses
+  * `match` lets you write pattern matches (like C switch). Using `if let` you can write a shorthand *match* with only 1 case.
+  * Rust has **immutability** by default. If a variable needs to be changed (Not reassigend) after creation use `let mut ...`. 
+  * Writing a `?` after a function call means, panic if the function returns an error or else continue (A very common idiom in rust)
+  * Imporing an file or object to main.rs is done by `mod <filename>`. Using this pattern we can then import object to other modules by `use crate::<filename>::<objectname>`
+  * Another important pattern `let Position{mut x, mut y} = position` is called **destructuring**. New variables x and y are created and their values are bind to the fields with the same name in position  
+
+## 4. A text editor
+
+* Vectors `Vec<Row>` are dynamic structure that hold the same type in this case `Row`
+* Using the directive `#[derive(Default)]` we can tell the compiler to derive a default method for us. This only works for simple structs (No derived types).
