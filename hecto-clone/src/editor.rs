@@ -1,5 +1,6 @@
 use crate::Terminal;
 use crate::Document;
+use crate::Row;
 use termion::event::Key;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -123,12 +124,21 @@ impl Editor{
         println!("{}\r", welcome_message);
     }
 
+    pub fn draw_row(&self, row: &Row){
+        let start = 0;
+        let end = self.terminal.size().width as usize;
+        let row = row.render(start, end);
+        println!("{}\r", row)
+    }
+
     fn draw_rows(&self) {
         let height: u16 = self.terminal.size().height;
-        for row in 0..height - 1{
+        for terminal_row in 0..height - 1{
             Terminal::clear_current_line();
-            if row == height / 3{
-                self.draw_welcome_message();
+            if let Some(row) = self.document.row(terminal_row as usize){
+                self.draw_row(row);
+            } else if terminal_row == height / 3{
+                self.draw_welcome_message()
             } else {
                 println!("~\r");
             }
