@@ -2,6 +2,7 @@ use crate::Terminal;
 use crate::Document;
 use crate::Row;
 use termion::event::Key;
+use std::env;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -52,7 +53,7 @@ impl Editor{
         // Remember that if we get an error or leave, we once finally refresh the screen => hence we can print it here 
         if self.should_quit {
             Terminal::clear_screen();
-            println!("Goodbye, Mate.\r")
+            println!("Goodbye, Mate.\r");
         } else {
             self.draw_rows();
             // After darwing rows we will end at the bottom of the screen, this will set our cursor to the top
@@ -137,7 +138,7 @@ impl Editor{
             Terminal::clear_current_line();
             if let Some(row) = self.document.row(terminal_row as usize){
                 self.draw_row(row);
-            } else if terminal_row == height / 3{
+            } else if self.document.is_empty() && terminal_row == height / 3{
                 self.draw_welcome_message()
             } else {
                 println!("~\r");
@@ -148,13 +149,20 @@ impl Editor{
 
     pub fn default() -> Self {
         let msg = "Mate, initilialising ya terminal failed!";
+        let args: Vec<String> = env::args().collect();
+        let document = if args.len() > 1{
+            let file_name = &args[1];
+            Document::open(&file_name).unwrap_or_default()
+        } else {
+            Document::default()
+        };
         Self{
             should_quit: false, 
             // As terminal also can return an error we catch it here and panic. No need to call die, because die would also remove what was drawn to the screen. At this point nothing has been drawn. 
             terminal: Terminal::default().expect(msg),
             // Cursor starts at top left of the screen
             cursor_position: Position::default(),
-            document: Document::open(),
+            document,
         }
     }
 }
