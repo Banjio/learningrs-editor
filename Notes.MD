@@ -115,4 +115,4 @@ let var: usize = if cond {
 
 * Nu -> An terminal emulator build in rust
 * irust -> Repl driven development with rust
-* bacon -> consolidating multiple cargo tools2
+* bacon -> consolidating multiple cargo tools
